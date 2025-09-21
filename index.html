@@ -9,9 +9,11 @@
     html,body{height:100%;margin:0;background:#000;}
     .wrap{height:100%;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:#000;}
     video{max-width:100vw;max-height:100vh;width:100%;height:auto;object-fit:contain;background:#000;}
-    .hint{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);background:rgba(0,0,0,.6);padding:10px 14px;border-radius:999px;
-      font:600 14px/1.2 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;color:#fff;opacity:.9;user-select:none}
-    .hidden{display:none;}
+    .hint,.cta{position:absolute;left:50%;transform:translateX(-50%);font:600 14px/1.2 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;color:#fff;user-select:none}
+    .hint{bottom:24px;background:rgba(0,0,0,.6);padding:10px 14px;border-radius:999px;opacity:.9}
+    .cta{bottom:24px;display:none}
+    .cta button{padding:10px 16px;border-radius:999px;border:none;background:#fff;color:#000;font-weight:700;cursor:pointer}
+    .hidden{display:none}
   </style>
 </head>
 <body>
@@ -21,21 +23,48 @@
       Il tuo browser non supporta il video.
     </video>
     <div id="hint" class="hint">Tocca per l’audio 🔊</div>
+    <div id="cta" class="cta"><button id="openIgBtn">Apri in Instagram</button></div>
   </div>
 
   <script>
-    const IG_URL = "https://www.instagram.com/appello.notturno/"; // <-- cambia qui
+    // ==== CONFIG IG ====
+    const USERNAME = "appello.notturno";
+    // ===================
 
-    const video = document.getElementById("dramaVideo");
-    const hint  = document.getElementById("hint");
+    const video   = document.getElementById("dramaVideo");
+    const hint    = document.getElementById("hint");
+    const cta     = document.getElementById("cta");
+    const openBtn = document.getElementById("openIgBtn");
 
+    const ua = navigator.userAgent || navigator.vendor || window.opera;
+    const isIOS = /iPad|iPhone|iPod/.test(ua);
+    const isAndroid = /Android/.test(ua);
+
+    const appSchemeIOS = `instagram://user?username=${USERNAME}`;
+    const appIntentAndroid = `intent://instagram.com/_u/${USERNAME}#Intent;package=com.instagram.android;scheme=https;end`;
+    const webDeep = `https://instagram.com/_u/${USERNAME}`;
+    const webUrl  = `https://www.instagram.com/${USERNAME}/`;
+
+    function openInstagram() {
+      if (isIOS) {
+        window.location.href = appSchemeIOS;
+        setTimeout(() => { window.location.href = webDeep; }, 800);
+      } else if (isAndroid) {
+        window.location.href = appIntentAndroid;
+        setTimeout(() => { window.location.href = webDeep; }, 800);
+      } else {
+        window.location.href = webUrl;
+      }
+    }
+
+    // Autoplay safe
     const safePlay = () => {
       const p = video.play();
       if (p && typeof p.then === "function") p.catch(()=>{});
     };
     window.addEventListener("load", safePlay);
-    document.addEventListener("visibilitychange", () => { if (!document.hidden) safePlay(); });
 
+    // Tap per attivare audio
     const enableAudio = () => {
       if (video.muted) {
         video.muted = false;
@@ -46,12 +75,20 @@
     video.addEventListener("click", enableAudio);
     hint.addEventListener("click", enableAudio);
 
-    video.addEventListener("ended", () => { window.location.href = IG_URL; });
+    // Redirect al termine
+    video.addEventListener("ended", openInstagram);
 
+    // Fallback: se non parte redirect automatico dopo durata+1s
     video.addEventListener("loadedmetadata", () => {
       const dur = isFinite(video.duration) ? video.duration : 30;
-      setTimeout(() => { if (!video.ended) window.location.href = IG_URL; }, (dur + 1) * 1000);
+      setTimeout(() => {
+        if (!video.ended) openInstagram();
+      }, (dur + 1) * 1000);
     });
+
+    // Mostra bottone manuale in caso di blocco browser
+    setTimeout(() => { cta.style.display = "block"; }, 2000);
+    openBtn.addEventListener("click", openInstagram);
   </script>
 </body>
 </html>
