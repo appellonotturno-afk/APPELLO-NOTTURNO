@@ -70,13 +70,19 @@
     const webDeep = `https://instagram.com/_u/${USERNAME}`;
     const webUrl  = `https://www.instagram.com/${USERNAME}/`;
 
+    let redirected = false;
+    let delayTimer = null;
+
     function openInstagram() {
+      if (redirected) return;
+      redirected = true;
+
       if (isIOS) {
         window.location.href = appSchemeIOS;
-        setTimeout(() => { window.location.href = webDeep; }, 800);
+        setTimeout(() => { if (!document.hidden) window.location.href = webDeep; }, 800);
       } else if (isAndroid) {
         window.location.href = appIntentAndroid;
-        setTimeout(() => { window.location.href = webDeep; }, 800);
+        setTimeout(() => { if (!document.hidden) window.location.href = webDeep; }, 800);
       } else {
         window.location.href = webUrl;
       }
@@ -102,15 +108,9 @@
 
     // Redirect al termine (+5s di attesa)
     video.addEventListener("ended", () => {
-      setTimeout(openInstagram, 5000);
-    });
-
-    // Fallback: redirect anche se qualcosa va storto
-    video.addEventListener("loadedmetadata", () => {
-      const dur = isFinite(video.duration) ? video.duration : 30;
-      setTimeout(() => {
-        if (!video.ended) openInstagram();
-      }, (dur + 1) * 1000);
+      // cancella eventuali timer residui
+      if (delayTimer) clearTimeout(delayTimer);
+      delayTimer = setTimeout(openInstagram, 5000);
     });
 
     // Mostra bottone manuale dopo 2s (in caso di blocco browser)
