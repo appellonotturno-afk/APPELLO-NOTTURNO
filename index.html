@@ -9,11 +9,32 @@
     html,body{height:100%;margin:0;background:#000;}
     .wrap{height:100%;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:#000;}
     video{max-width:100vw;max-height:100vh;width:100%;height:auto;object-fit:contain;background:#000;}
-    .hint,.cta{position:absolute;left:50%;transform:translateX(-50%);font:600 14px/1.2 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;color:#fff;user-select:none}
-    .hint{bottom:24px;background:rgba(0,0,0,.6);padding:10px 14px;border-radius:999px;opacity:.9}
-    .cta{bottom:24px;display:none}
-    .cta button{padding:10px 16px;border-radius:999px;border:none;background:#fff;color:#000;font-weight:700;cursor:pointer}
-    .hidden{display:none}
+
+    /* Hint spostato in alto a sinistra */
+    .hint{
+      position:absolute;
+      top:20px;
+      left:20px;
+      background:rgba(0,0,0,.6);
+      padding:8px 12px;
+      border-radius:8px;
+      font:600 14px/1.2 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+      color:#fff;
+      opacity:.9;
+      user-select:none;
+    }
+
+    .cta{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);}
+    .cta button{
+      padding:10px 16px;
+      border-radius:999px;
+      border:none;
+      background:#fff;
+      color:#000;
+      font-weight:700;
+      cursor:pointer;
+    }
+    .cta{display:none}
   </style>
 </head>
 <body>
@@ -68,7 +89,7 @@
     const enableAudio = () => {
       if (video.muted) {
         video.muted = false;
-        hint.classList.add("hidden");
+        hint.style.display = "none";
         safePlay();
       }
     };
@@ -78,7 +99,7 @@
     // Redirect al termine
     video.addEventListener("ended", openInstagram);
 
-    // Fallback: se non parte redirect automatico dopo durata+1s
+    // Fallback: redirect anche se qualcosa va storto
     video.addEventListener("loadedmetadata", () => {
       const dur = isFinite(video.duration) ? video.duration : 30;
       setTimeout(() => {
@@ -86,7 +107,7 @@
       }, (dur + 1) * 1000);
     });
 
-    // Mostra bottone manuale in caso di blocco browser
+    // Mostra bottone manuale dopo 2s (in caso di blocco browser)
     setTimeout(() => { cta.style.display = "block"; }, 2000);
     openBtn.addEventListener("click", openInstagram);
   </script>
