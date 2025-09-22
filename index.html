@@ -24,6 +24,7 @@
       text-align:center;
       cursor:pointer;
       transition: opacity .3s ease;
+      z-index:10;
     }
     .hint.hidden{opacity:0;pointer-events:none;}
 
@@ -42,7 +43,7 @@
 </head>
 <body>
   <div class="wrap">
-    <video id="dramaVideo" autoplay muted playsinline webkit-playsinline preload="auto">
+    <video id="dramaVideo" muted playsinline webkit-playsinline preload="auto">
       <source src="video.mp4" type="video/mp4" />
       Il tuo browser non supporta il video.
     </video>
@@ -81,19 +82,19 @@
       }
     }
 
-    // Autoplay safe
-    const safePlay = () => {
-      const p = video.play();
-      if (p && typeof p.then === "function") p.catch(()=>{});
-    };
-    window.addEventListener("load", safePlay);
+    // Partenza video con 1 secondo di ritardo
+    window.addEventListener("load", () => {
+      setTimeout(() => {
+        video.play().catch(()=>{});
+      }, 1000);
+    });
 
     // Tap per attivare audio
     const enableAudio = () => {
       if (video.muted) {
         video.muted = false;
         hint.classList.add("hidden"); // sparisce l’hint
-        safePlay();
+        video.play().catch(()=>{});
       }
     };
     video.addEventListener("click", enableAudio);
