@@ -100,8 +100,10 @@
     video.addEventListener("click", enableAudio);
     hint.addEventListener("click", enableAudio);
 
-    // Redirect al termine
-    video.addEventListener("ended", openInstagram);
+    // Redirect al termine (+2s di attesa)
+    video.addEventListener("ended", () => {
+      setTimeout(openInstagram, 2000);
+    });
 
     // Fallback: redirect anche se qualcosa va storto
     video.addEventListener("loadedmetadata", () => {
